@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Pastel - Dulce Sabor</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+    <style>
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #db2777;
+            --secondary: #9f1239;
+            --light: #fff1f2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: rgba(254, 202, 202, 0.95);
+            padding: 18px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid white;
+        }
+
+        .logo-icon i {
+            font-size: 32px;
+            color: #9f1239;
+        }
+
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 38px;
+            background: linear-gradient(90deg, #9f1239, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .product-detail {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 40px;
+        }
+
+        .product-image {
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 42px;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .price {
+            font-size: 36px;
+            color: var(--primary);
+            font-weight: 700;
+            margin: 15px 0;
+        }
+
+        .description {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .options {
+            display: grid;
+            gap: 20px;
+        }
+
+        .option-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .option-group select,
+        .option-group input {
+            width: 100%;
+            padding: 16px;
+            border: 3px solid var(--primary);
+            border-radius: 16px;
+            font-size: 16px;
+        }
+
+        .quantity-input {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin: 25px 0;
+        }
+
+        .quantity-input button {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .quantity-input input {
+            width: 80px;
+            text-align: center;
+            padding: 12px;
+            border: 3px solid var(--primary);
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn-add:hover {
+            background: var(--primary-dark);
+        }
+
+        .favorite-btn {
+            margin: 20px 0;
+            padding: 14px 32px;
+            background: white;
+            color: var(--primary);
+            border: 3px solid var(--primary);
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 17px;
+        }
+
+        .favorite-btn i {
+            font-size: 22px;
+        }
+
+        .favorite-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .favorite-btn.active i {
+            animation: heartbeat 1.4s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.25)
+            }
+        }
+
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin: 40px auto;
+            padding: 16px 40px;
+            background: #ddd;
+            color: #555;
+            border-radius: 50px;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+        .floating-cart-btn {
+            position: fixed;
+            bottom: 35px;
+            right: 35px;
+            width: 78px;
+            height: 78px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 15px 40px rgba(236, 72, 153, 0.5);
+            cursor: pointer;
+            z-index: 1000;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .floating-cart-btn .badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ef4444;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .floating-panel {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 460px;
+            max-width: 100%;
+            height: 92vh;
+            background: white;
+            border-radius: 32px 32px 0 0;
+            box-shadow: 0 -12px 50px rgba(0, 0, 0, 0.22);
+            transform: translateY(100%);
+            transition: 0.5s;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .floating-panel.open {
+            transform: translateY(0);
+        }
+
+        .panel-header {
+            padding: 30px;
+            background: linear-gradient(135deg, #fecaca, #fdb8c0);
+            border-radius: 32px 32px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--secondary);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .panel-close {
+            background: none;
+            border: none;
+            font-size: 40px;
+            cursor: pointer;
+            color: var(--secondary);
+        }
+
+        .panel-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 40px;
+        }
+
+        #miniCalendar {
+            margin-bottom: 40px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .fc .fc-button-primary {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
+
+        .scheduling-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 35px 0;
+        }
+
+        .scheduling-form label {
+            font-size: 16px;
+            color: var(--secondary);
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .scheduling-form input,
+        .scheduling-form select {
+            padding: 18px;
+            border: 3px solid var(--primary);
+            border-radius: 20px;
+            font-size: 17px;
+        }
+
+        #halfPaymentInfo {
+            text-align: center;
+            margin: 20px 0;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 20px;
+            display: none;
+        }
+
+        .cart-items {
+            margin: 40px 0;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 2px dashed #fdb8c0;
+            font-size: 18px;
+        }
+
+        .cart-item .remove-item {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .cart-summary p {
+            display: flex;
+            justify-content: space-between;
+            margin: 18px 0;
+            font-size: 19px;
+        }
+
+        .cart-summary .total {
+            font-weight: 700;
+            font-size: 28px;
+            color: var(--secondary);
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-size: 22px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        .btn-checkout:hover {
+            background: var(--primary-dark);
+            transform: translateY(-5px);
+        }
+
+        .alert {
+            padding: 20px;
+            border-radius: 20px;
+            margin: 30px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: 0.4s;
+        }
+
+        .alert.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #fecaca;
+        }
+
+        @media (max-width:768px) {
+            .product-detail {
+                grid-template-columns: 1fr;
+            }
+
+            .product-image {
+                height: 400px;
+            }
+
+            .scheduling-form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-birthday-cake"></i></div>
+                <h1>Dulce Sabor</h1>
+            </div>
+            <nav>
+                <a href="catalog.html">Catálogo</a>
+                <a href="orders.html">Mis Pedidos</a>
+                <a href="favorites.html">Favoritos</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="product-detail" id="productDetail">
+        <div style="grid-column: span 2; text-align:center; padding:100px;">
+            <i class="fas fa-spinner fa-spin" style="font-size:60px; color:#ec4899;"></i>
+        </div>
+    </div>
+
+    <!-- Botón carrito flotante -->
+    <div class="floating-cart-btn" id="openCartBtn">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="badge" id="cartBadge">0</span>
+    </div>
+
+    <!-- Panel flotante -->
+    <div class="floating-panel" id="floatingPanel">
+        <div class="panel-header">
+            <span>Tu Pedido</span>
+            <button class="panel-close" id="closePanelBtn">×</button>
+        </div>
+        <div class="panel-body">
+            <div id="miniCalendar"></div>
+
+            <form class="scheduling-form">
+                <div><label for="pickupDate">Fecha de recojida</label><input type="date" id="pickupDate" required></div>
+                <div><label for="pickupTime">Hora de recojida</label>
+                    <select id="pickupTime" required>
+                        <option value="">Selecciona</option>
+                        <option value="10:00">10:00 AM</option>
+                        <option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option>
+                        <option value="13:00">1:00 PM</option>
+                        <option value="14:00">2:00 PM</option>
+                        <option value="15:00">3:00 PM</option>
+                        <option value="16:00">4:00 PM</option>
+                        <option value="17:00">5:00 PM</option>
+                    </select>
+                </div>
+
+                <!-- CAMPO TELÉFONO OBLIGATORIO -->
+                <div style="grid-column: span 2;">
+                    <label for="phone">Teléfono de contacto <span style="color:#ec4899;">*</span></label>
+                    <input type="tel" id="phone" placeholder="Ej: 0414-1234567 o +584141234567" required>
+                    <small style="color:#666; display:block; margin-top:6px;">Para coordinar entrega o cambios</small>
+                </div>
+            </form>
+
+            <div id="halfPaymentInfo">
+                50% a pagar: <span id="halfAmount">$0.00</span>
+            </div>
+
+            <div class="cart-items" id="cartItems"></div>
+
+            <div class="cart-summary">
+                <p><span>Subtotal:</span> <span id="subtotal">$0.00</span></p>
+                <p><span>Fecha y hora:</span> <span id="scheduledDateTime">-</span></p>
+                <p><span>Teléfono:</span> <span id="displayPhone">-</span></p>
+                <p class="total"><span>50% a pagar:</span> <span id="total">$0.00</span></p>
+            </div>
+
+            <button class="btn-checkout" id="checkoutBtn">Reservar Pedido</button>
+            <div id="panelAlert" class="alert"></div>
+        </div>
+    </div>
+
+    <a href="javascript:history.back()" class="back-btn">Volver</a>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCcP-o0ptLQM5vOOB0O0Z8hZH_KFv3Uvm8",
+            authDomain: "pasteleria-e3386.firebaseapp.com",
+            projectId: "pasteleria-e3386",
+            storageBucket: "pasteleria-e3386.firebasestorage.app",
+            messagingSenderId: "365968659983",
+            appId: "1:365968659983:web:2d904933f8f7a91094f57a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        const productDetail = document.getElementById('productDetail');
+        const openCartBtn = document.getElementById('openCartBtn');
+        const floatingPanel = document.getElementById('floatingPanel');
+        const closePanelBtn = document.getElementById('closePanelBtn');
+        const cartBadge = document.getElementById('cartBadge');
+        const cartItems = document.getElementById('cartItems');
+        const subtotalEl = document.getElementById('subtotal');
+        const totalEl = document.getElementById('total');
+        const scheduledDateTime = document.getElementById('scheduledDateTime');
+        const displayPhone = document.getElementById('displayPhone');
+        const pickupDate = document.getElementById('pickupDate');
+        const pickupTime = document.getElementById('pickupTime');
+        const phoneInput = document.getElementById('phone');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const panelAlert = document.getElementById('panelAlert');
+        const halfAmountEl = document.getElementById('halfAmount');
+        const halfPaymentInfo = document.getElementById('halfPaymentInfo');
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let miniCalendar = null;
+
+        const sabores = [
+            { nombre: 'Vainilla', extra: 0 },
+            { nombre: 'Chocolate', extra: 50 },
+            { nombre: 'Fresa', extra: 70 },
+            { nombre: 'Red Velvet', extra: 100 },
+            { nombre: 'Limón', extra: 30 },
+            { nombre: 'Café', extra: 80 }
+        ];
+
+        const tamanos = [
+            { nombre: 'Pequeño (15 porciones)', precio: 1.0 },
+            { nombre: 'Mediano (25 porciones)', precio: 1.5 },
+            { nombre: 'Grande (30 porciones)', precio: 2.2 }
+        ];
+
+        async function loadProduct() {
+            if (!productId) {
+                productDetail.innerHTML = `<div style="grid-column: span 2; text-align:center; padding:100px;"><h3>Producto no encontrado</h3></div>`;
+                return;
+            }
+
+            try {
+                const doc = await db.collection('products').doc(productId).get();
+                if (!doc.exists) {
+                    productDetail.innerHTML = `<div style="grid-column: span 2; text-align:center; padding:100px;"><h3>No encontrado</h3></div>`;
+                    return;
+                }
+
+                const p = doc.data();
+                const basePrice = p.price;
+
+                productDetail.innerHTML = `
+                    <div class="product-image">
+                        <img src="${p.image}" alt="${p.name}">
+                    </div>
+                    <div class="product-info">
+                        <h2>${p.name}</h2>
+                        <div class="price" id="displayPrice">$${basePrice.toFixed(2)}</div>
+                        <p class="description">${p.description || 'Delicioso pastel personalizado.'}</p>
+
+                        <div class="favorite-btn" id="favoriteBtn" onclick="toggleFavorite()">
+                            <i class="far fa-heart"></i> <span>Favorito</span>
+                        </div>
+
+                        <div class="options">
+                            <div class="option-group">
+                                <label>Sabor</label>
+                                <select id="sabor" onchange="updatePrice()">${sabores.map(s => `<option value="${s.extra}">${s.nombre} (+$${s.extra})</option>`).join('')}</select>
+                            </div>
+                            <div class="option-group">
+                                <label>Tamaño</label>
+                                <select id="tamano" onchange="updatePrice()">
+                                    ${tamanos.map(t => `<option value="${t.precio}" data-nombre="${t.nombre}">${t.nombre}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="option-group">
+                                <label for="dedicatoria">Dedicatoria (opcional)</label>
+                                <input type="text" id="dedicatoria" placeholder="Ej: Feliz cumple Manuel" maxlength="60">
+                            </div>
+                            <div class="quantity-input">
+                                <button type="button" onclick="changeQty(-1)">−</button>
+                                <input type="number" id="quantity" value="1" min="1">
+                                <button type="button" onclick="changeQty(1)">+</button>
+                            </div>
+                        </div>
+
+                        <button class="btn-add" onclick="addToCartAndOpen()">Agregar al Carrito</button>
+                    </div>
+                `;
+
+                loadFavoriteStatus();
+                updatePrice();
+
+            } catch (e) { console.error(e); }
+        }
+
+        // Resto de funciones sin cambios (favoritos, etc.)...
+        async function toggleFavorite() {
+            if (!auth.currentUser) {
+                alert("Debes iniciar sesión para guardar favoritos");
+                window.location.href = "auth.html";
+                return;
+            }
+
+            const userId = auth.currentUser.uid;
+            const favRef = db.collection('favorites').doc(userId).collection('items').doc(productId);  // ← AQUÍ EL CAMBIO
+
+            try {
+                const doc = await favRef.get();
+                const btn = document.getElementById('favoriteBtn');
+                const icon = btn.querySelector('i');
+                const text = btn.querySelector('span');
+
+                if (doc.exists) {
+                    await favRef.delete();
+                    btn.classList.remove('active');
+                    icon.className = 'far fa-heart';
+                    text.textContent = 'Favorito';
+                } else {
+                    const productDoc = await db.collection('products').doc(productId).get();
+                    const productData = productDoc.data();
+
+                    await favRef.set({
+                        productId: productId,
+                        name: productData.name,
+                        image: productData.image,
+                        price: productData.price,
+                        addedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    btn.classList.add('active');
+                    icon.className = 'fas fa-heart';
+                    text.textContent = 'En favoritos';
+                }
+            } catch (error) {
+                console.error("Error al toggle favorito:", error);
+            }
+        }
+
+        async function loadFavoriteStatus() {
+            if (!auth.currentUser || !productId) return;
+
+            const userId = auth.currentUser.uid;
+            const favRef = db.collection('favorites').doc(userId).collection('items').doc(productId);  // ← AQUÍ EL CAMBIO
+
+            try {
+                const doc = await favRef.get();
+                const btn = document.getElementById('favoriteBtn');
+                if (!btn) return;
+
+                const icon = btn.querySelector('i');
+                const text = btn.querySelector('span');
+
+                if (doc.exists) {
+                    btn.classList.add('active');
+                    icon.className = 'fas fa-heart';
+                    text.textContent = 'En favoritos';
+                } else {
+                    btn.classList.remove('active');
+                    icon.className = 'far fa-heart';
+                    text.textContent = 'Favorito';
+                }
+            } catch (error) {
+                console.error("Error cargando estado de favorito:", error);
+            }
+        }
+
+        window.updatePrice = () => {
+            const saborExtra = parseFloat(document.getElementById('sabor').value);
+            const tamanoMultiplier = parseFloat(document.getElementById('tamano').value);
+            const basePrice = parseFloat(document.getElementById('displayPrice').textContent.replace('$', ''));
+            const finalPrice = (basePrice + saborExtra) * tamanoMultiplier;
+            document.getElementById('displayPrice').textContent = `$${finalPrice.toFixed(2)}`;
+        };
+
+        window.changeQty = (delta) => {
+            const qty = document.getElementById('quantity');
+            let val = parseInt(qty.value) || 1;
+            val += delta;
+            if (val < 1) val = 1;
+            qty.value = val;
+        };
+
+        window.addToCartAndOpen = () => {
+            if (!auth.currentUser) {
+                alert('Inicia sesión para agregar al carrito');
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            const saborNombre = document.getElementById('sabor').selectedOptions[0].text.split(' (')[0];
+            const saborExtra = parseFloat(document.getElementById('sabor').value);
+            const tamanoNombre = document.getElementById('tamano').selectedOptions[0].dataset.nombre;
+            const tamanoMultiplier = parseFloat(document.getElementById('tamano').value);
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+            const dedicatoria = document.getElementById('dedicatoria').value.trim();
+            const basePrice = parseFloat(document.querySelector('.price').textContent.replace('$', ''));
+
+            const finalPrice = (basePrice + saborExtra) * tamanoMultiplier;
+
+            const item = {
+                id: productId,
+                name: `${document.querySelector('.product-info h2').textContent} (${tamanoNombre}, ${saborNombre})`,
+                price: finalPrice,
+                quantity: quantity,
+                baseId: productId,
+                sabor: saborNombre,
+                tamano: tamanoNombre,
+                dedicatoria: dedicatoria || null
+            };
+
+            const existing = cart.find(i => i.baseId === productId && i.sabor === saborNombre && i.tamano === tamanoNombre && i.dedicatoria === (dedicatoria || null));
+            if (existing) existing.quantity += quantity;
+            else cart.push(item);
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartUI();
+            floatingPanel.classList.add('open');
+            document.getElementById('dedicatoria').value = '';
+        };
+
+        function updateCartUI() {
+            const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
+            cartBadge.textContent = totalItems;
+            cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
+            renderCartItems();
+            updateScheduledDateTime();
+            updatePhoneDisplay();
+            updateHalfPayment();
+        }
+
+        function renderCartItems() {
+            cartItems.innerHTML = '';
+            let subtotal = 0;
+            cart.forEach((item, idx) => {
+                const total = item.price * item.quantity;
+                subtotal += total;
+                let name = `${item.name} ×${item.quantity}`;
+                if (item.dedicatoria) name += `<br><small style="color:#ec4899;font-weight:600;">“${item.dedicatoria}”</small>`;
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `
+                    <div>${name}</div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span>$${total.toFixed(2)}</span>
+                        <button class="remove-item" onclick="removeFromCart(${idx})">×</button>
+                    </div>
+                `;
+                cartItems.appendChild(div);
+            });
+            subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
+            totalEl.textContent = `$${(subtotal / 2).toFixed(2)}`;
+        }
+
+        function updateHalfPayment() {
+            const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+            halfAmountEl.textContent = `$${(total / 2).toFixed(2)}`;
+            halfPaymentInfo.style.display = total > 0 ? 'block' : 'none';
+        }
+
+        function updateScheduledDateTime() {
+            scheduledDateTime.textContent = pickupDate.value && pickupTime.value ? `${pickupDate.value} a las ${pickupTime.value}` : '-';
+        }
+
+        function updatePhoneDisplay() {
+            displayPhone.textContent = phoneInput.value.trim() || '-';
+        }
+
+        window.removeFromCart = idx => {
+            cart.splice(idx, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartUI();
+            showPanelAlert('Eliminado del carrito', 'success');
+        };
+
+        function showPanelAlert(html, type = 'error') {
+            panelAlert.innerHTML = html;
+            panelAlert.className = `alert alert-${type} show`;
+            setTimeout(() => panelAlert.className = 'alert', 8000);
+        }
+
+        function initMiniCalendar() {
+            miniCalendar = new FullCalendar.Calendar(document.getElementById('miniCalendar'), {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                headerToolbar: { left: 'prev,next', center: 'title', right: '' },
+                height: 'auto',
+                dateClick: info => { pickupDate.value = info.dateStr; updateScheduledDateTime(); },
+                validRange: { start: new Date() }
+            });
+            miniCalendar.render();
+        }
+
+        openCartBtn.onclick = () => floatingPanel.classList.add('open');
+        closePanelBtn.onclick = () => floatingPanel.classList.remove('open');
+
+        // ESCUCHA CAMBIO EN TELÉFONO
+        phoneInput?.addEventListener('input', updatePhoneDisplay);
+
+        // BOTÓN RESERVAR PEDIDO
+        checkoutBtn.onclick = async () => {
+            if (cart.length === 0) return showPanelAlert('El carrito está vacío', 'error');
+            if (!pickupDate.value || !pickupTime.value) return showPanelAlert('Selecciona fecha y hora', 'error');
+            if (!phoneInput.value.trim() || phoneInput.value.trim().length < 10) {
+                return showPanelAlert('Ingresa un número de teléfono válido', 'error');
+            }
+            if (!auth.currentUser) return showPanelAlert('Debes iniciar sesión', 'error');
+
+            const phone = phoneInput.value.trim();
+            const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+            const halfPayment = total / 2;
+
+            try {
+                await db.collection('orders').add({
+                    userId: auth.currentUser.uid,
+                    userEmail: auth.currentUser.email,
+                    userName: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+                    phone: phone,                                      // GUARDADO
+                    items: cart,
+                    total: total,
+                    halfPayment: halfPayment,
+                    paymentMethod: 'transferencia',
+                    paymentStatus: 'pending_proof',
+                    scheduledDate: pickupDate.value,
+                    scheduledTime: pickupTime.value,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                const mensaje = `
+                    <div style="background:#d1fae5;color:#065f46;padding:30px;border-radius:20px;text-align:center;border:3px solid #a7f3d0;line-height:1.8;font-size:18px;">
+                        <strong>¡Tu pedido ha sido reservado con éxito!</strong><br><br>
+                        Deberás subir tu comprobante del 50% en <strong>Mis Pedidos</strong> para que comencemos a prepararlo.
+                    </div>
+                `;
+
+                showPanelAlert(mensaje, 'success');
+                localStorage.removeItem('cart');
+                cart = [];
+                updateCartUI();
+
+                setTimeout(() => {
+                    floatingPanel.classList.remove('open');
+                    window.location.href = 'orders.html';
+                }, 6000);
+
+            } catch (e) {
+                console.error(e);
+                showPanelAlert('Error al reservar el pedido. Intenta de nuevo.', 'error');
+            }
+        };
+
+        window.onload = () => {
+            loadProduct();
+            updateCartUI();
+            initMiniCalendar();
+            const today = new Date().toISOString().split('T')[0];
+            pickupDate.min = today;
+            pickupDate.value = today;
+            updatePhoneDisplay();
+        };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pastelería Dulce Sabor - Admin</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            emailjs.init("bPLKdyCACSLBR9mbR"); // ← Cambia por tu Public Key de EmailJS
+        })();
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500&display=swap');
+
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #db2777;
+            --secondary: #9f1239;
+            --light: #fff1f2;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        header {
+            background: #fecaca;
+            padding: 12px 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-placeholder {
+            background: var(--primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: var(--secondary);
+            margin-left: 12px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 32px;
+        }
+
+        nav a,
+        nav button {
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 15px;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        nav a:hover,
+        nav button:hover {
+            color: var(--primary);
+        }
+
+        .admin-section {
+            padding: 48px 24px;
+            flex-grow: 1;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: var(--secondary);
+            margin-bottom: 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 2px;
+            background: var(--primary);
+            margin: 8px auto 0;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #fecaca;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 15px;
+            color: var(--secondary);
+            cursor: pointer;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .products,
+        .calendar-container,
+        .orders-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .product-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .product-form input,
+        .product-form textarea,
+        .product-form select {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-add-product {
+            grid-column: span 2;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-add-product:disabled {
+            background: #fecaca;
+            cursor: not-allowed;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 150px;
+            border: 2px dashed #fecaca;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #f9f9f9;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .category-filter {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            background: #fecaca;
+            color: var(--secondary);
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .category-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .product-card {
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 12px;
+        }
+
+        .product-info h3 {
+            margin: 0 0 6px;
+            font-size: 16px;
+            color: var(--secondary);
+        }
+
+        .product-info .category {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-edit,
+        .btn-delete {
+            flex: 1;
+            padding: 6px;
+            font-size: 13px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            background: #fbbf24;
+            color: #92400e;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* ESTADOS */
+        .status-pending {
+            background: #fbbf24;
+            color: #92400e;
+        }
+
+        .status-processing {
+            background: #60a5fa;
+            color: white;
+        }
+
+        .status-completed {
+            background: #34d399;
+            color: white;
+        }
+
+        .status-cancelled {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* BOTÓN VER COMPROBANTE */
+        .btn-proof {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-proof:hover {
+            background: var(--primary-dark);
+        }
+
+        /* MODAL COMPROBANTE */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: #fecaca;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--secondary);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--secondary);
+        }
+
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+            background: #fff;
+        }
+
+        .modal-body img {
+            max-width: 100%;
+            max-height: 65vh;
+            border-radius: 10px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        /* CALENDARIO */
+        #calendarEl .fc {
+            font-size: 14px !important;
+        }
+
+        #calendarEl .fc-daygrid-day-number {
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        #calendarEl .fc-col-header-cell {
+            background: #fecaca;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .fc .fc-button-primary {
+            background-color: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: white !important;
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: var(--primary-dark) !important;
+        }
+
+        .fc-event {
+            border: none !important;
+            border-radius: 6px !important;
+            padding: 2px 6px !important;
+            font-size: 12px !important;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .recent-order {
+            border-bottom: 1px dashed #fdb8c0;
+            padding: 12px 0;
+            font-size: 13px;
+        }
+
+        .recent-order:last-child {
+            border-bottom: none;
+        }
+
+        .recent-order .email {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 4px;
+        }
+
+        .recent-order .items {
+            color: #555;
+            margin: 6px 0;
+            line-height: 1.5;
+        }
+
+        .recent-order .dedicatoria {
+            color: #d9468f;
+            font-style: italic;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .recent-order .meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #777;
+        }
+
+        .recent-order .status {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .filters-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .filters-form div {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filters-form label {
+            font-size: 14px;
+            color: var(--secondary);
+            font-weight: 500;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .filters-form select,
+        .filters-form input {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .orders-table th {
+            background: #fecaca;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .orders-table select {
+            padding: 6px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .dedicatoria {
+            color: #d9468f;
+            font-style: italic;
+            font-weight: 600;
+            margin: 4px 0;
+            font-size: 13px;
+            padding-left: 4px;
+        }
+
+        footer {
+            background: var(--secondary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-top: auto;
+            font-size: 14px;
+        }
+
+        @media (max-width: 992px) {
+            .calendar-container {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .product-form {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-add-product {
+                grid-column: span 1;
+            }
+
+            .filters-form div {
+                min-width: 100%;
+            }
+
+            .container {
+                padding: 0 16px;
+            }
+
+            .admin-section {
+                padding: 32px 16px;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .status-confirmed {
+                background: #8b5cf6;
+                color: white;
+                padding: 2px 8px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 600;
+            }
+
+            .btn-email {
+                background: #10b981;
+                color: white;
+                border: none;
+                padding: 6px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                margin-left: 8px;
+            }
+
+            .btn-email:hover {
+                background: #059669;
+            }
+
+            .btn-call {
+                background: #10b981;
+                color: white;
+                border: none;
+                padding: 6px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+                margin-left: 4px;
+                white-space: nowrap;
+            }
+
+            .btn-call:hover {
+                background: #059669;
+            }
+
+            .btn-call i {
+                margin-right: 4px;
+            }
+
+            .no-phone {
+                color: #999;
+                font-size: 11px;
+                font-style: italic;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <div class="logo-container">
+                <div class="logo-placeholder">Logo</div>
+                <h1>Pastelería Dulce Sabor</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="catalog.html">Catálogo</a></li>
+                    <li><a href="orders.html">Mis Pedidos</a></li>
+                    <li><a href="favorites.html">Favoritos</a></li>
+                    <li id="authLink"><a href="auth.html">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="admin-section">
+        <div class="container">
+            <h2 class="section-title">Panel de Administración</h2>
+
+            <div class="tabs">
+                <button class="tab active" data-tab="products">Productos</button>
+                <button class="tab" data-tab="calendar">Calendario y Reservaciones</button>
+                <button class="tab" data-tab="orders">Pedidos</button>
+            </div>
+
+            <!-- Productos -->
+            <div id="products" class="tab-content">
+                <div class="products-container">
+                    <h3>Agregar Producto</h3>
+                    <form id="productForm" class="product-form">
+                        <input type="text" id="productName" placeholder="Nombre" required>
+                        <input type="number" id="productPrice" placeholder="Precio" step="0.01" required>
+                        <div>
+                            <label>Categoría</label>
+                            <select id="productCategory" required>
+                                <option value="">Selecciona</option>
+                                <option value="caballero">Caballero</option>
+                                <option value="dama">Dama</option>
+                                <option value="infantiles">Infantiles</option>
+                                <option value="todos">Para todos</option>
+                                <option value="sencilla">Decoración sencilla</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Foto</label>
+                            <input type="file" id="productImage" accept="image/*" required>
+                            <div class="image-preview" id="imagePreview"><small>Sube una foto</small></div>
+                        </div>
+                        <textarea id="productDescription" placeholder="Descripción" rows="2"></textarea>
+                        <button type="submit" class="btn-add-product" id="addBtn">Agregar Producto</button>
+                    </form>
+
+                    <div class="category-filter">
+                        <button class="category-btn active" data-category="">Todos</button>
+                        <button class="category-btn" data-category="caballero">Caballero</button>
+                        <button class="category-btn" data-category="dama">Dama</button>
+                        <button class="category-btn" data-category="infantiles">Infantiles</button>
+                        <button class="category-btn" data-category="todos">Para todos</button>
+                        <button class="category-btn" data-category="sencilla">Sencilla</button>
+                    </div>
+
+                    <h3>Lista de Productos</h3>
+                    <div class="products-grid" id="adminProductsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Calendario + Pedidos Recientes -->
+            <div id="calendar" class="tab-content" style="display:none;">
+                <div class="calendar-container"
+                    style="display: grid; grid-template-columns: 1fr 380px; gap: 24px; margin-top: 16px;">
+                    <div>
+                        <div class="filters-form" style="margin-bottom: 16px;">
+                            <div>
+                                <label for="calendarStatusFilter">Filtrar por estado</label>
+                                <select id="calendarStatusFilter">
+                                    <option value="">Todos</option>
+                                    <option value="pending">Pendiente</option>
+                                    <option value="processing">En preparación</option>
+                                    <option value="completed">Listo</option>
+                                    <option value="cancelled">Cancelado</option>
+                                    <option value="confirmed">Confirmado</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="calendarEl"
+                            style="font-size: 14px; background: white; border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                        </div>
+                    </div>
+
+                    <div
+                        style="background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: fit-content; max-height: 70vh; overflow-y: auto;">
+                        <h3 style="margin: 0 0 16px; font-size: 18px; color: var(--secondary); text-align: center;">
+                            Pedidos Recientes</h3>
+                        <div id="recentOrdersList">
+                            <p style="text-align:center; color:#aaa; font-size:14px;">Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pedidos -->
+            <div id="orders" class="tab-content" style="display:none;">
+                <div class="orders-container">
+                    <h3>Lista de Pedidos</h3>
+                    <div class="filters-form">
+                        <div>
+                            <label for="ordersStatusFilter">Filtrar por estado</label>
+                            <select id="ordersStatusFilter">
+                                <option value="">Todos</option>
+                                <option value="pending">Pendiente</option>
+                                <option value="processing">En preparación</option>
+                                <option value="completed">Listo</option>
+                                <option value="cancelled">Cancelado</option>
+                                <option value="confirmed">Confirmado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table class="orders-table" id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Ítems</th>
+                                <th>Total</th>
+                                <th>Fecha</th>
+                                <th>Comprobante</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MODAL COMPROBANTE -->
+    <div class="modal" id="proofModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Comprobante de Pago</h3>
+                <button class="modal-close" id="proofModalClose">X</button>
+            </div>
+            <div class="modal-body">
+                <img id="proofImage" src="" alt="Comprobante">
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETALLE PEDIDO -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Pedidos del día</h3>
+                <button class="modal-close" id="modalClose">X</button>
+            </div>
+            <div class="modal-body" id="modalBody">Cargando...</div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Pastelería Dulce Sabor. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCcP-o0ptLQM5vOOB0O0Z8hZH_KFv3Uvm8",
+            authDomain: "pasteleria-e3386.firebaseapp.com",
+            projectId: "pasteleria-e3386",
+            storageBucket: "pasteleria-e3386.firebasestorage.app",
+            messagingSenderId: "365968659983",
+            appId: "1:365968659983:web:2d904933f8f7a91094f57a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // DOM
+        const authLink = document.getElementById('authLink');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const productForm = document.getElementById('productForm');
+        const productImageInput = document.getElementById('productImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const adminProductsGrid = document.getElementById('adminProductsGrid');
+        const categoryButtons = document.querySelectorAll('.category-btn');
+        const calendarEl = document.getElementById('calendarEl');
+        const calendarStatusFilter = document.getElementById('calendarStatusFilter');
+        const ordersStatusFilter = document.getElementById('ordersStatusFilter');
+        const ordersBody = document.getElementById('ordersBody');
+        const eventModal = document.getElementById('eventModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalClose = document.getElementById('modalClose');
+        const addBtn = document.getElementById('addBtn');
+        const recentOrdersList = document.getElementById('recentOrdersList');
+
+        // MODAL COMPROBANTE
+        const proofModal = document.getElementById('proofModal');
+        const proofImage = document.getElementById('proofImage');
+        const proofModalClose = document.getElementById('proofModalClose');
+
+        window.showProof = function (base64) {
+            proofImage.src = base64;
+            proofModal.classList.add('open');
+        };
+
+        proofModalClose.addEventListener('click', () => proofModal.classList.remove('open'));
+        proofModal.addEventListener('click', (e) => { if (e.target === proofModal) proofModal.classList.remove('open'); });
+
+        let calendar = null;
+        let allOrders = [];
+        let allProducts = [];
+        let currentCategory = '';
+
+        const categoryNames = {
+            'caballero': 'Caballero', 'dama': 'Dama', 'infantiles': 'Infantiles',
+            'todos': 'Para todos', 'sencilla': 'Decoración sencilla'
+        };
+
+        const statusMap = {
+            'pending': { text: 'Pendiente', class: 'status-pending' },
+            'confirmed': { text: 'Confirmado', class: 'status-confirmed' },  // ← AÑADIDO
+            'processing': { text: 'En preparación', class: 'status-processing' },
+            'completed': { text: 'Listo', class: 'status-completed' },
+            'cancelled': { text: 'Cancelado', class: 'status-cancelled' }
+        };
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // === PRODUCTOS ===
+        productImageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="Vista previa">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.innerHTML = '<small>Sube una foto</small>';
+            }
+        });
+
+        categoryButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                categoryButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.category;
+                loadProducts();
+            });
+        });
+
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            addBtn.disabled = true;
+            addBtn.textContent = "Guardando...";
+
+            const name = document.getElementById('productName').value.trim();
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const category = document.getElementById('productCategory').value;
+            const description = document.getElementById('productDescription').value.trim();
+            const file = productImageInput.files[0];
+
+            if (!name || isNaN(price) || !category || !file) {
+                alert("Completa todos los campos");
+                addBtn.disabled = false;
+                addBtn.textContent = "Agregar Producto";
+                return;
+            }
+
+            try {
+                const imageBase64 = await fileToBase64(file);
+                await db.collection('products').add({
+                    name, price, category, description,
+                    image: imageBase64,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                productForm.reset();
+                imagePreview.innerHTML = '<small>Sube una foto</small>';
+                loadProducts();
+                alert("Producto agregado con éxito");
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Error: " + error.message);
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = "Agregar Producto";
+            }
+        });
+
+        async function loadProducts() {
+            try {
+                const snapshot = await db.collection('products').orderBy('createdAt', 'desc').get();
+                allProducts = [];
+                adminProductsGrid.innerHTML = '';
+
+                snapshot.forEach(doc => {
+                    const p = doc.data();
+                    p.id = doc.id;
+                    if (currentCategory && p.category !== currentCategory) return;
+                    allProducts.push(p);
+
+                    const catName = categoryNames[p.category] || p.category;
+                    const card = `
+                        <div class="product-card">
+                            <img src="${p.image || 'https://via.placeholder.com/250'}" alt="${p.name}">
+                            <div class="product-info">
+                                <div class="category">${catName}</div>
+                                <h3>${p.name}</h3>
+                                <p>$${p.price.toFixed(2)}</p>
+                                <div class="product-actions">
+                                    <button class="btn-edit" onclick="editProduct('${doc.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.category}', '${(p.description || '').replace(/'/g, "\\'")}')">Editar</button>
+                                    <button class="btn-delete" onclick="deleteProduct('${doc.id}')">Eliminar</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    adminProductsGrid.innerHTML += card;
+                });
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        window.editProduct = async (id, name, price, category, description) => {
+            const newName = prompt('Nombre:', name);
+            const newPrice = prompt('Precio:', price);
+            const newCat = prompt('Categoría:', category);
+            const newDesc = prompt('Descripción:', description);
+            if (newName && newPrice && newCat) {
+                try {
+                    await db.collection('products').doc(id).update({
+                        name: newName, price: parseFloat(newPrice),
+                        category: newCat, description: newDesc
+                    });
+                    loadProducts();
+                } catch (error) { alert('Error editando'); }
+            }
+        };
+
+        window.deleteProduct = async (id) => {
+            if (confirm('¿Eliminar producto?')) {
+                try {
+                    await db.collection('products').doc(id).delete();
+                    loadProducts();
+                } catch (error) { alert('Error eliminando'); }
+            }
+        };
+
+        // === TABS ===
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                tabContents.forEach(c => c.style.display = 'none');
+                document.getElementById(tab.dataset.tab).style.display = 'block';
+            });
+        });
+
+        // === PEDIDOS ===
+        async function loadOrders() {
+            try {
+                const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').get();
+                allOrders = [];
+                snapshot.forEach(doc => {
+                    const order = doc.data();
+                    order.id = doc.id;
+                    allOrders.push(order);
+                });
+                renderCalendar();
+                renderOrdersTable();
+                renderRecentOrders();
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        function renderOrdersTable() {
+            const status = ordersStatusFilter.value;
+            ordersBody.innerHTML = '';
+            allOrders.forEach(order => {
+                if (status && order.status !== status) return;
+
+                let itemsList = '';
+                order.items.forEach(item => {
+                    itemsList += `${item.name} (x${item.quantity})`;
+                    if (item.dedicatoria) itemsList += `<br><span class="dedicatoria">“${item.dedicatoria}”</span>`;
+                    itemsList += '<br>';
+                });
+
+                const shortId = order.id.substring(0, 8);
+                const proofHTML = order.paymentProofBase64
+                    ? `<button class="btn-proof" onclick="showProof('${order.paymentProofBase64}')">Ver</button>`
+                    : '—';
+
+                const statusInfo = statusMap[order.status] || { text: 'Desconocido', class: '' };
+
+                // BOTÓN DE CORREO (solo en Confirmado, En preparación o Listo)
+                // BOTONES DE ACCIONES (Correo + Llamar)
+                let actionButtons = '';
+
+                // Botón de correo (solo en estados permitidos)
+                if (['confirmed', 'processing', 'completed'].includes(order.status)) {
+                    actionButtons += `<button class="btn-email" onclick="sendOrderEmail('${order.id}', '${order.userEmail}')">
+        <i class="fas fa-envelope"></i> Correo
+    </button>`;
+                }
+
+                // Botón de llamada (si tiene teléfono)
+                if (order.phone && order.phone.trim() !== '') {
+                    const cleanPhone = order.phone.replace(/[^\d+]/g, ''); // limpia formato
+                    actionButtons += `<button class="btn-call" onclick="window.location.href='tel:${cleanPhone}'" title="Llamar a ${order.phone}">
+        <i class="fas fa-phone"></i> Llamar
+    </button>`;
+                } else {
+                    actionButtons += `<span class="no-phone">Sin teléfono</span>`;
+                }
+
+                const row = `
+    <tr>
+        <td>${shortId}</td>
+        <td>${order.userEmail}</td>
+        <td>${itemsList}</td>
+        <td>$${order.total.toFixed(2)}</td>
+        <td>${order.scheduledDate} ${order.scheduledTime || ''}</td>
+        <td>${proofHTML}</td>
+        <td>
+            <select onchange="updateStatus('${order.id}', this.value)">
+                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendiente</option>
+                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmado</option>
+                <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>En preparación</option>
+                <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Listo</option>
+                <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelado</option>
+            </select>
+        </td>
+        <td style="text-align:center; white-space:nowrap; gap:6px; display:flex; flex-wrap:wrap; justify-content:center;">
+            <button onclick="deleteOrder('${order.id}')" style="background:none;border:none;color:#ef4444;cursor:pointer;" title="Eliminar">
+                <i class="fas fa-trash"></i>
+            </button>
+            ${actionButtons}
+        </td>
+    </tr>`;
+                ordersBody.innerHTML += row;
+            });
+        }
+
+        window.updateStatus = async (id, status) => {
+            try {
+                await db.collection('orders').doc(id).update({ status });
+                loadOrders();
+            } catch (error) {
+                alert('Error actualizando estado');
+            }
+        };
+
+        window.deleteOrder = async (id) => {
+            if (!confirm('¿Eliminar este pedido?')) return;
+            try {
+                await db.collection('orders').doc(id).delete();
+                loadOrders();
+            } catch (error) {
+                alert('Error eliminando pedido');
+            }
+        };
+
+        // === CALENDARIO Y RECIENTES ===
+        function renderCalendar() {
+            const status = calendarStatusFilter.value;
+            const events = [];
+            const grouped = {};
+
+            allOrders.forEach(order => {
+                if (status && order.status !== status) return;
+                const date = order.scheduledDate;
+                const time = order.scheduledTime || 'Sin hora';
+                const key = `${date}_${time}`;
+                if (!grouped[key]) grouped[key] = { date, time, orders: [], total: 0, count: 0 };
+                grouped[key].orders.push(order);
+                grouped[key].total += order.total;
+                grouped[key].count++;
+            });
+
+            Object.values(grouped).forEach(g => {
+                const title = `${g.count} pedido${g.count > 1 ? 's' : ''} - $${g.total.toFixed(2)} - ${g.time}`;
+                const statusClass = g.orders[0].status;
+                events.push({
+                    title, start: g.date, allDay: true,
+                    extendedProps: { orders: g.orders },
+                    classNames: [statusClass]
+                });
+            });
+
+            if (calendar) {
+                calendar.removeAllEventSources();
+                calendar.addEventSource(events);
+            }
+        }
+
+        function renderRecentOrders() {
+            const recent = allOrders.slice(0, 8);
+            recentOrdersList.innerHTML = recent.length === 0
+                ? '<p style="text-align:center; color:#aaa;">No hay pedidos</p>'
+                : '';
+
+            recent.forEach(order => {
+                let itemsHTML = '';
+                order.items.forEach(item => {
+                    itemsHTML += `<div>${item.name} ×${item.quantity}</div>`;
+                    if (item.dedicatoria) itemsHTML += `<div class="dedicatoria">“${item.dedicatoria}”</div>`;
+                });
+
+                const timeAgo = formatTimeAgo(order.createdAt?.toDate() || new Date());
+                const proofHTML = order.paymentProofBase64
+                    ? `<button class="btn-proof" onclick="showProof('${order.paymentProofBase64}')">Ver</button>`
+                    : '';
+
+                const statusInfo = statusMap[order.status] || { text: 'Desconocido', class: '' };
+
+                const div = document.createElement('div');
+                div.className = 'recent-order';
+                div.innerHTML = `
+                    <div class="email">${order.userEmail}</div>
+                    <div class="items">${itemsHTML}</div>
+                    <div class="meta">
+                        <span>${order.scheduledDate} ${order.scheduledTime || ''}</span>
+                        <span class="status ${statusInfo.class}">${statusInfo.text}</span>
+                    </div>
+                    <div style="font-size:11px; color:var(--primary); margin-top:4px;">Hace ${timeAgo}</div>
+                    ${proofHTML ? `<div style="margin-top:6px;">${proofHTML}</div>` : ''}
+                `;
+                recentOrdersList.appendChild(div);
+            });
+        }
+
+        function formatTimeAgo(date) {
+            const diff = Date.now() - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            return days > 0 ? `${days}d` : hours > 0 ? `${hours}h` : minutes > 0 ? `${minutes}m` : 'Ahora';
+        }
+
+        function initCalendar() {
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth', locale: 'es',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: '' },
+                eventClick: function (info) {
+                    const orders = info.event.extendedProps.orders;
+                    modalTitle.textContent = `Pedidos del ${info.event.start.toLocaleDateString('es-ES')}`;
+                    modalBody.innerHTML = '';
+                    orders.forEach(order => {
+                        let itemsHTML = '';
+                        order.items.forEach(item => {
+                            itemsHTML += `<p style="margin:4px 0;"><strong>${item.name}</strong> ×${item.quantity}</p>`;
+                            if (item.dedicatoria) itemsHTML += `<p class="dedicatoria">“${item.dedicatoria}”</p>`;
+                        });
+
+                        const proofHTML = order.paymentProofBase64
+                            ? `<button class="btn-proof" onclick="showProof('${order.paymentProofBase64}')">Ver comprobante</button>`
+                            : 'Sin comprobante';
+
+                        const statusInfo = statusMap[order.status] || { text: 'Desconocido', class: '' };
+
+                        const div = document.createElement('div');
+                        div.className = 'order-item';
+                        div.innerHTML = `
+                            <h4>${order.userEmail}</h4>
+                            <div>${itemsHTML}</div>
+                            <p><strong>Total:</strong> $${order.total.toFixed(2)}</p>
+                            <p><strong>Hora:</strong> ${order.scheduledTime || 'No especificada'}</p>
+                            <p><strong>Comprobante:</strong> ${proofHTML}</p>
+                            <span class="status ${statusInfo.class}">${statusInfo.text}</span>
+                        `;
+                        modalBody.appendChild(div);
+                    });
+                    eventModal.classList.add('open');
+                }
+            });
+            calendar.render();
+        }
+
+        window.sendOrderEmail = async function (orderId, userEmail) {
+            if (!confirm(`¿Enviar notificación a ${userEmail}?`)) return;
+
+            try {
+                const orderDoc = await db.collection('orders').doc(orderId).get();
+                const order = orderDoc.data();
+                order.id = orderDoc.id;
+
+                let items = "";
+                order.items.forEach(i => {
+                    items += `• ${i.name} × ${i.quantity}`;
+                    if (i.dedicatoria) items += ` — "${i.dedicatoria}"`;
+                    items += "\n";
+                });
+
+                const mensajes = {
+                    confirmed: "¡Pago confirmado! Ya estamos preparando tu pedido con mucho cariño.",
+                    processing: "¡Tu pastel ya está en el horno! Te avisaremos cuando esté listo.",
+                    completed: "¡Tu pedido ya está listo para recoger! Pásalo cuando gustes."
+                };
+
+                await emailjs.send("default_service", "template_3bcus9n", {  // ← Cambia template_xxxxxxxx por tu Template ID
+                    to_email: userEmail,
+                    customer_name: order.userName || userEmail.split('@')[0],
+                    order_id: order.id.substring(0, 8).toUpperCase(),
+                    items_list: items,
+                    total_amount: order.total.toFixed(2),
+                    scheduled_date: order.scheduledDate,
+                    scheduled_time: order.scheduledTime || "No especificada",
+                    message: mensajes[order.status] || "Gracias por tu pedido. Te mantendremos informado."
+                });
+
+                alert("Correo enviado con éxito a " + userEmail);
+            } catch (err) {
+                console.error(err);
+                alert("Error al enviar el correo");
+            }
+        };
+
+        calendarStatusFilter.addEventListener('change', renderCalendar);
+        ordersStatusFilter.addEventListener('change', renderOrdersTable);
+        modalClose.addEventListener('click', () => eventModal.classList.remove('open'));
+        eventModal.addEventListener('click', (e) => { if (e.target === eventModal) eventModal.classList.remove('open'); });
+
+        // === AUTH ===
+        auth.onAuthStateChanged(async user => {
+            if (user) {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (userDoc.exists && userDoc.data().role === 'admin') {
+                    authLink.innerHTML = '<button id="signOutBtn">Cerrar Sesión</button>';
+                    document.getElementById('signOutBtn').addEventListener('click', () => {
+                        auth.signOut();
+                        window.location.href = 'index.html';
+                    });
+                    loadProducts();
+                    loadOrders();
+                    initCalendar();
+                } else {
+                    window.location.href = 'index.html';
+                }
+            } else {
+                window.location.href = 'auth.html';
+            }
+        });
+    </script>
+</body>
+
+</html>
